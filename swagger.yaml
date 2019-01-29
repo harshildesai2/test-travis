@@ -1,0 +1,414 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0",
+    "title": "Consent Management API",
+    "description": "This is a set of APIs to get or update email subscription notifications in Responsys.",
+    "contact": {
+      "name": "slack"
+    }
+  },
+  "host": "ecom-catalog-swagger.s3-website-us-west-2.amazonaws.com",
+  "basePath": "/v1",
+  "schemes": [
+    "https"
+  ],
+  "tags": [
+    {
+      "name": "Consent Management",
+      "description": "Consent Management APIs"
+    }
+  ],
+  "paths": {
+    "/getsubscriberinfo": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "tags": [
+          "Consent Management"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Retrieve subscription details for the email id passed in the request.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "GuestRequest",
+            "description": "Guest emailid for which the Responsys subscription details are to be retrieved",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/GuestRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "schema": {
+              "$ref": "#/definitions/SubscriberRecordInfoDetail"
+            }
+          }
+        },
+        "security": [
+          {
+            "sigv4": []
+          }
+        ]
+      }
+    },
+    "/getsubscriptionstatus": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "tags": [
+          "Consent Management"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Retrieve subscription status for the email id passed in the request.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "GuestRequest",
+            "description": "Guest emailid for which the Responsys subscription status needs to be retrieved",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/GuestRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "schema": {
+              "$ref": "#/definitions/SubscriptionStatus"
+            }
+          }
+        },
+        "security": [
+          {
+            "sigv4": []
+          }
+        ]
+      }
+    },
+    "/updatesubscriberinfo": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "tags": [
+          "Consent Management"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "summary": "Add/update a subscriber in Responsys",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "Subscriber",
+            "description": "Subscriber object that needs to be added/updated",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Subscriber"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "schema": {
+              "$ref": "#/definitions/SubscriberRecordInfoSummary"
+            }
+          }
+        },
+        "security": [
+          {
+            "sigv4": []
+          }
+        ]
+      }
+    }
+  },
+  "securityDefinitions": {
+    "sigv4": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header",
+      "x-amazon-apigateway-authtype": "awsSigv4"
+    }
+  },
+  "definitions": {
+    "GuestRequest": {
+      "type": "object",
+      "properties": {
+        "emailid": {
+          "type": "string",
+          "description": "EmailId of the guest",
+          "example": "existinguser@gmail.com"
+        }
+      }
+    },
+    "SubscriptionStatus": {
+      "type": "object",
+      "properties": {
+        "emailid": {
+          "type": "string",
+          "description": "EmailId of the guest",
+          "example": "existinguser@gmail.com"
+        },
+        "subscribed": {
+          "type": "string",
+          "description": "subscription status true/false",
+          "example": "true"
+        }
+      }
+    },
+    "SubscriberRecordInfoDetail": {
+      "type": "object",
+      "properties": {
+        "recordData": {
+          "type": "object",
+          "properties": {
+            "fieldNames": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "example": "\"EMAIL_ADDRESS_\",\"COUNTRY_\",\"PRODUCT_GENDER\",\"PRODUCT_ACTIVITIES\",\"RIID_\",\"EMAIL_PERMISSION_STATUS_\""
+              }
+            },
+            "records": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "example": "\"existinguser@gmail.com\",\"US\",\"men,women\",\"toandfrom,cycle,yog,run,training,water\",\"112312312312\",\"I\""
+                }
+              }
+            },
+            "mapTemplateName": {
+              "type": "string"
+            }
+          }
+        },
+        "mergeRule": {
+          "type": "object",
+          "properties": {
+            "textValue": {
+              "type": "string"
+            },
+            "updateOnMatch": {
+              "type": "string"
+            },
+            "insertOnNoMatch": {
+              "type": "boolean"
+            },
+            "htmlValue": {
+              "type": "string"
+            },
+            "optinValue": {
+              "type": "string"
+            },
+            "matchColumnName1": {
+              "type": "string"
+            },
+            "matchColumnName2": {
+              "type": "string"
+            },
+            "matchOperator": {
+              "type": "string"
+            },
+            "optoutValue": {
+              "type": "string"
+            },
+            "rejectRecordIfChannelEmpty": {
+              "type": "string"
+            },
+            "defaultPermissionStatus": {
+              "type": "string"
+            },
+            "matchColumnName3": {
+              "type": "string"
+            }
+          }
+        },
+        "links": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "rel": {
+                "type": "string"
+              },
+              "href": {
+                "type": "string"
+              },
+              "method": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "SubscriberRecordInfoSummary": {
+      "type": "object",
+      "properties": {
+        "recordData": {
+          "type": "object",
+          "properties": {
+            "fieldNames": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "example": "\"RIID_\""
+              }
+            },
+            "records": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "example": "\"1231231231\""
+                }
+              }
+            },
+            "mapTemplateName": {
+              "type": "string"
+            }
+          }
+        },
+        "mergeRule": {
+          "type": "object",
+          "properties": {
+            "textValue": {
+              "type": "string"
+            },
+            "updateOnMatch": {
+              "type": "string"
+            },
+            "insertOnNoMatch": {
+              "type": "boolean"
+            },
+            "htmlValue": {
+              "type": "string"
+            },
+            "optinValue": {
+              "type": "string"
+            },
+            "matchColumnName1": {
+              "type": "string"
+            },
+            "matchColumnName2": {
+              "type": "string"
+            },
+            "matchOperator": {
+              "type": "string"
+            },
+            "optoutValue": {
+              "type": "string"
+            },
+            "rejectRecordIfChannelEmpty": {
+              "type": "string"
+            },
+            "defaultPermissionStatus": {
+              "type": "string"
+            },
+            "matchColumnName3": {
+              "type": "string"
+            }
+          }
+        },
+        "links": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "rel": {
+                "type": "string"
+              },
+              "href": {
+                "type": "string"
+              },
+              "method": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "Subscriber": {
+      "type": "object",
+      "properties": {
+        "emailAddress": {
+          "type": "string",
+          "example": "newuser@gmail.com"
+        },
+        "country": {
+          "type": "string",
+          "example": "US"
+        },
+        "language": {
+          "type": "string",
+          "example": "EN"
+        },
+        "optIn": {
+          "type": "string",
+          "example": "Y"
+        },
+        "userId": {
+          "type": "string",
+          "example": "153206384"
+        },
+        "firstName": {
+          "type": "string",
+          "example": "Harry"
+        },
+        "lastName": {
+          "type": "string",
+          "example": "Kewel"
+        },
+        "userType": {
+          "type": "string",
+          "example": "1"
+        },
+        "lastActivityDate": {
+          "type": "string",
+          "example": "2018-12-26 02:03:41"
+        },
+        "registrationDate": {
+          "type": "string",
+          "example": "2018-12-26 02:02:58"
+        },
+        "gender": {
+          "type": "string",
+          "example": "0"
+        },
+        "dateOfBirth": {
+          "type": "string",
+          "example": "1985-12-31 02:02:58"
+        },
+        "employeeType": {
+          "type": "string",
+          "example": "none"
+        },
+        "productGender": {
+          "type": "string",
+          "example": "men,women"
+        },
+        "productActivities": {
+          "type": "string",
+          "example": "toandfrom,cycle,yog,run,training,water"
+        }
+      }
+    },
+  }
+}

@@ -1,0 +1,195 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: An AWS Serverless Specification for creating API gateway.
+
+Parameters:
+  S3BucketForSrc:
+    Type: String
+    Default: lll-consentmgt-dev-bucket
+    Description: |
+      The s3 bucket for consenttmgmt src code.
+  S3PathForSrc:
+    Type: String
+    Default: functions
+    Description: |
+      Path of the Jar to be deployed.
+  validatorName:
+    Type: String
+    Default: inputValidator
+  apiGatewayStageName:
+    Type: "String"
+    AllowedPattern: "^[a-z0-9]+$"
+    Default: "devenv"
+
+Resources:
+
+  ConsentMgtAPI:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: ConsentManagementAPI
+      Description: 'REST API to handle consent management behaviour updated'
+
+  RequestValidator:
+    Type: AWS::ApiGateway::RequestValidator
+    Properties:
+      Name: !Ref validatorName
+      RestApiId: !Ref ConsentMgtAPI
+      ValidateRequestParameters: true
+
+  GetSubscriberLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: 'LLL-getSubscriber'
+      Handler: com.amazonaws.lambda.responsys.GetSubscriberInfoHandler::handleRequest
+      Runtime: java8
+      Code:
+        S3Bucket: !Ref S3BucketForSrc
+        S3Key:  !Sub ${S3PathForSrc}/consentmgtapi-1.0.0-jar-with-dependencies.jar
+      Description: 'Responsys add/update subscriber info Lambda function'
+      MemorySize: 512
+      Timeout: 15
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Environment:
+        Variables:
+          AUTH_TYPE: password
+          PASSWORD: Lulu%40lem0n
+          RESPONSYS_AUTH_TOKEN_ENDPOINT: https://login2.responsys.net/rest/api/v1/auth/token
+          USERNAME: loyalty_API
+          GET_MEMBER_API_URL: /rest/api/v1/lists/CONTACTS_LIST/members/
+
+  GetSubscriberAPIResource:
+      Type: AWS::ApiGateway::Resource
+      Properties:
+        RestApiId: !Ref ConsentMgtAPI
+        ParentId: !GetAtt ConsentMgtAPI.RootResourceId
+        PathPart: 'getsubsriberinfo'
+
+  GetSubscriberAPIMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      HttpMethod: POST
+      ResourceId: !Ref GetSubscriberAPIResource
+      RestApiId: !Ref ConsentMgtAPI
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub
+        - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${Arn}/invocations
+        - Arn: !GetAtt GetSubscriberLambda.Arn
+
+  LambdaInvokePermission2:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+    - GetSubscriberLambda
+    - ConsentMgtAPI
+    Properties:
+      FunctionName: !GetAtt GetSubscriberLambda.Arn
+      Action: "lambda:InvokeFunction"
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub
+      - arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${__ApiId__}/*/POST/getsubsriberinfo
+      - __ApiId__: !Ref ConsentMgtAPI
+
+  UpdateSubscriberLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: 'LLL-updateSubscriber'
+      Handler: com.amazonaws.lambda.responsys.UpdateSubscriberInfoHandler::handleRequest
+      Runtime: java8
+      Code:
+        S3Bucket: !Ref S3BucketForSrc
+        S3Key:  !Sub ${S3PathForSrc}/consentmgtapi-1.0.0-jar-with-dependencies.jar
+      Description: 'Responsys add/update subscriber info Lambda function'
+      MemorySize: 512
+      Timeout: 15
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Environment:
+        Variables:
+          AUTH_TYPE: password
+          PASSWORD: Lulu%40lem0n
+          RESPONSYS_AUTH_TOKEN_ENDPOINT: https://login2.responsys.net/rest/api/v1/auth/token
+          USERNAME: loyalty_API
+          UPDATE_API_URL: /rest/api/v1/lists/CONTACTS_LIST/members
+          MERGE_RULE_JSON: "{ \"htmlValue\" : \"H\", \"optinValue\" : \"Y\", \"textValue\" : \"T\", \"insertOnNoMatch\" : true, \"updateOnMatch\" : \"REPLACE_ALL\", \"matchColumnName1\" : \"email_address_\", \"matchOperator\" : \"NONE\", \"optoutValue\" : \"N\", \"rejectRecordIfChannelEmpty\" : \"\", \"defaultPermissionStatus\" : \"OPTIN\" }"
+
+  UpdateSubscriberAPIResource:
+      Type: AWS::ApiGateway::Resource
+      Properties:
+        RestApiId: !Ref ConsentMgtAPI
+        ParentId: !GetAtt ConsentMgtAPI.RootResourceId
+        PathPart: 'updatesubscriberinfo'
+        
+  UpdateSubscriberAPIMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      HttpMethod: POST
+      ResourceId: !Ref UpdateSubscriberAPIResource
+      RestApiId: !Ref ConsentMgtAPI
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub
+        - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${Arn}/invocations
+        - Arn: !GetAtt UpdateSubscriberLambda.Arn
+
+  LambdaInvokePermission3:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+    - UpdateSubscriberLambda
+    - ConsentMgtAPI
+    Properties:
+      FunctionName: !GetAtt UpdateSubscriberLambda.Arn
+      Action: "lambda:InvokeFunction"
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub
+      - arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${__ApiId__}/*/POST/updatesubscriberinfo
+      - __ApiId__: !Ref ConsentMgtAPI
+
+  apiGatewayDeployment:
+    Type: "AWS::ApiGateway::Deployment"
+    DependsOn:
+      - "GetSubscriberAPIMethod"
+      - "UpdateSubscriberAPIMethod"
+    Properties:
+      RestApiId: !Ref "ConsentMgtAPI"
+      StageName: !Ref "apiGatewayStageName"
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+            - apigateway.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
+      Policies:
+      - PolicyName: root
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            -
+              Effect: Allow
+              Action:
+                - "logs:CreateLogGroup"
+              Resource: "arn:aws:logs:*:*:*"
+            -
+              Effect: Allow
+              Action:
+                - "logs:CreateLogStream"
+                - "logs:PutLogEvents"
+              Resource: "arn:aws:logs:*:*:*"
+            -
+              Effect: Allow
+              Action:
+                - "lambda:InvokeFunction"
+              Resource: "*"
+Outputs:
+  RootResourceId:
+    Value: !GetAtt ConsentMgtAPI.RootResourceId

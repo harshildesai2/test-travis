@@ -1,0 +1,9 @@
+/target/*
+/.settings/
+*.class
+*.bin
+/src/test/*
+*rebel.xml
+.project
+*.classpath
+*/.stupidgit
