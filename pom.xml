@@ -35,6 +35,33 @@
           </execution>
         </executions>
       </plugin>
+<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-dependency-plugin</artifactId>
+			<version>3.1.0</version>
+			<executions>
+				<execution>
+					<id>copy</id>
+					<phase>package</phase>
+					<goals>
+						<goal>copy</goal>
+					</goals>
+				</execution>
+			</executions>
+			<configuration>
+				<artifactItems>
+					<artifactItem>
+						<groupId>com.amazonaws.lambda</groupId>
+						<artifactId>consentmgtapi</artifactId>
+						<version>1.0.0</version>
+						<type>jar</type>
+						<overWrite>false</overWrite>
+						<outputDirectory>${project.build.directory}/dist</outputDirectory>
+					</artifactItem>
+				</artifactItems>
+				<overWriteSnapshots>true</overWriteSnapshots>
+			</configuration>
+</plugin>
     </plugins>
   </build>
 
