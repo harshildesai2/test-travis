@@ -1,0 +1,12 @@
+language: java
+script: mvn package
+
+deploy:
+  provider: s3
+  access_key_id: $AWS_ACCESS_KEY_ID
+  secret_access_key: $AWS_SECRET_ACCESS_KEY
+  bucket: $UPLOAD_BUCKET
+  upload-dir: $UPLOAD_DIR
+  skip_cleanup: true
+  local_dir: "target/dist"
+region: $REGION
