@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -24,8 +26,8 @@ public class GetSubscriberInfoHandler extends BaseResponsysHandler implements Re
 
 	private static final String EMAILID_PARAM = "emailid";
 	private static final String GET_MEMBER_API_URL = System.getenv("GET_MEMBER_API_URL");
-	
-	
+	private static final Map <String, String> authResponseMap = getAuthTokenResponsys();
+
 	/* (non-Javadoc)
 	 * @see com.amazonaws.services.lambda.runtime.RequestStreamHandler#handleRequest(java.io.InputStream, java.io.OutputStream, com.amazonaws.services.lambda.runtime.Context)
 	 */
@@ -37,21 +39,16 @@ public class GetSubscriberInfoHandler extends BaseResponsysHandler implements Re
     	int errStatusCode = 400;
     	
     	try {
-    		//make AUTH TOKEN call
-    		String apiResponse = getAuthToken(logger);
-    		logger.log("Response receivied from AuthToken API call: " + apiResponse +NEW_LINE);
     		
-    		if(null == apiResponse || apiResponse.length() < 1) {
-    			logger.log("Failed retrieving the AUTH token \n");
-				sendResponse(outputStream, getErrorResponse(errStatusCode, "Failed retrieving the AUTH token"));
-				return;
+    		String apiHost = null;
+			String apiAuthToken = null;
+			
+    		//make AUTH TOKEN call
+    		if(authResponseMap != null) {
+    			apiHost = authResponseMap.get("apiHost");
+    			apiAuthToken = authResponseMap.get("apiAuthToken");
     		}
     		
-    		//parse AUTH TOKEN api response
-    		JSONObject responseJson = new JSONObject(apiResponse);
-    		String apiHost = responseJson.get(END_POINT).toString();
-			String apiAuthToken = responseJson.get(AUTH_TOKEN).toString();
-			
 			//get request post param "emailid"
 			String emailId = getSubscriberEmail(inputStream);
 			logger.log("Email ID passed in request: " + emailId +NEW_LINE);
@@ -177,6 +174,35 @@ public class GetSubscriberInfoHandler extends BaseResponsysHandler implements Re
 			}
 		}
 		logger.log("The response payload does not have the expected data, returning null from getTransformedResponse() method");
+		return null;
+	}
+	
+	private static Map<String, String> getAuthTokenResponsys() {
+		
+		System.out.println("--------getting AUTHTOKEN-----------");
+		String apiResponse;
+		try {
+			apiResponse = getAuthToken();
+		
+		
+			if(null == apiResponse || apiResponse.length() < 1) {
+				return null;
+			}
+			
+			//parse AUTH TOKEN api response
+			JSONObject responseJson = new JSONObject(apiResponse);
+			String apiHost = responseJson.get(END_POINT).toString();
+			String apiAuthToken = responseJson.get(AUTH_TOKEN).toString();
+			
+			if(apiHost != null && apiAuthToken != null) {
+				Map<String, String> responsysMap = new HashMap<String, String>();
+				responsysMap.put("apiHost", apiHost);
+				responsysMap.put("apiAuthToken", apiAuthToken);
+				return responsysMap;
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return null;
 	}
 	

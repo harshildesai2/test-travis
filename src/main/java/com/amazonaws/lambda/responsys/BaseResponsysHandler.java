@@ -104,6 +104,47 @@ public abstract class BaseResponsysHandler {
 		return null;
 	}
 	
+	public static String getAuthToken() throws IOException {
+
+		HttpURLConnection conn = null;
+		
+		try {
+			URL url = new URL(AUTH_TOKEN_EP);
+
+			conn = (HttpURLConnection) url.openConnection();
+			conn.setRequestMethod(POST);
+			conn.setRequestProperty(CACHE_CONTROL, NO_CACHE);
+			conn.setRequestProperty(CONTENT_TYPE, APPLICATION_X_WWW_FORM_URLENCODED);
+			conn.setDoOutput(true);
+			conn.getOutputStream().write(AUTH_TOKEN_CREDS.getBytes(UTF_8));
+			
+			BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+			
+			StringBuffer result = new StringBuffer();
+			String inputLine;
+			while ((inputLine = br.readLine()) != null) {
+				result.append(inputLine);
+			}
+			br.close();
+			
+			
+			if (conn.getResponseCode() != 200) {
+				throw new RuntimeException("Failed : HTTP error code: " + conn.getResponseCode());
+			}
+			
+			return result.toString();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (conn != null) 
+				conn.disconnect();
+		}
+		return null;
+	}
+	
 	/**
 	 * writes response back to response stream
 	 * @param outputStream
