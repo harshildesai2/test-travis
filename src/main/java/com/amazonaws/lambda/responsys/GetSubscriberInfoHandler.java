@@ -17,7 +17,7 @@ import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.amazonaws.util.IOUtils;
 
 /**
- * Lambda to get the subscriber info based on the emailId passed by the guest
+ * Lambda to get the subscriber info based on the emailId passed by the guest 
  *
  */
 public class GetSubscriberInfoHandler extends BaseResponsysHandler implements RequestStreamHandler{
