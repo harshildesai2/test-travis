@@ -91,6 +91,19 @@
       <version>1.1.0</version>
     </dependency>
     
+    <dependency>
+	    <groupId>com.amazonaws</groupId>
+	    <artifactId>aws-lambda-java-events</artifactId>
+	    <version>2.2.2</version>
+	</dependency>
+	
+	<!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-dynamodb -->
+	<dependency>
+	    <groupId>com.amazonaws</groupId>
+	    <artifactId>aws-java-sdk-dynamodb</artifactId>
+	    <version>1.11.52</version>
+	</dependency>
+    
     <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-core -->
 	<dependency>
 	    <groupId>com.amazonaws</groupId>
