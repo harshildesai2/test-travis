@@ -202,7 +202,7 @@ public abstract class BaseResponsysHandler {
 		try {
 			tokenItem = retrieveTokenFromDB(getDynamoDB());
 		} catch (Exception e) {
-			logger.log("Error retrieving the token item from dynamoDB: " + e);
+			logger.log("Error retrieving the token item from dynamoDB: " + e.getStackTrace());
 		}
 		
 		if(tokenItem != null && tokenItem.hasAttribute(AUTH_TOKEN) && tokenItem.hasAttribute(END_POINT)) {
@@ -232,13 +232,13 @@ public abstract class BaseResponsysHandler {
 	    			//parse AUTH TOKEN api response
 					if(responseJson.get(END_POINT) != null && responseJson.get(AUTH_TOKEN) != null) {
 						apiDetailsMap = new HashMap<String, String>();
-						apiDetailsMap.put(END_POINT, tokenItem.get(END_POINT).toString());
-						apiDetailsMap.put(AUTH_TOKEN, tokenItem.get(AUTH_TOKEN).toString());
+						apiDetailsMap.put(END_POINT, responseJson.get(END_POINT).toString());
+						apiDetailsMap.put(AUTH_TOKEN, responseJson.get(AUTH_TOKEN).toString());
 						logger.log("Successfully assigned token details " + NEW_LINE);
 					}
 	    		}
 			} catch (Exception e) {
-				logger.log("Error retrieving the token from AUTH TOKEN api call: " + e + NEW_LINE);
+				logger.log("Error retrieving the token from AUTH TOKEN api call: " + e.getStackTrace() + NEW_LINE);
 			}
 		}
 		return apiDetailsMap;
