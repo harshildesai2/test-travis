@@ -7,27 +7,28 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.amazonaws.services.dynamodbv2.document.Item;
+import com.amazonaws.services.dynamodbv2.document.PutItemOutcome;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.amazonaws.util.IOUtils;
 
 /**
- * Lambda to get the subscriber info based on the emailId passed by the guest 
+ * Lambda to get the subscriber info based on the emailId passed by the guest
  *
  */
 public class GetSubscriberInfoHandler extends BaseResponsysHandler implements RequestStreamHandler{
 
 	private static final String EMAILID_PARAM = "emailid";
 	private static final String GET_MEMBER_API_URL = System.getenv("GET_MEMBER_API_URL");
-	private static final Map <String, String> authResponseMap = getAuthTokenResponsys();
-
+	
+	
 	/* (non-Javadoc)
 	 * @see com.amazonaws.services.lambda.runtime.RequestStreamHandler#handleRequest(java.io.InputStream, java.io.OutputStream, com.amazonaws.services.lambda.runtime.Context)
 	 */
@@ -37,16 +38,20 @@ public class GetSubscriberInfoHandler extends BaseResponsysHandler implements Re
     	StringBuffer result = new StringBuffer();
     	HttpURLConnection urlConnection = null;
     	int errStatusCode = 400;
+    	String apiHost, apiAuthToken = null;
     	
     	try {
+    		//Get AUTH TOKEN from DB
+    		Map<String, String> apiDetailsMap = getResponsysApiInfo(logger);
     		
-    		String apiHost = null;
-			String apiAuthToken = null;
-			
-    		//make AUTH TOKEN call
-    		if(authResponseMap != null) {
-    			apiHost = authResponseMap.get("apiHost");
-    			apiAuthToken = authResponseMap.get("apiAuthToken");
+    		if(apiDetailsMap != null) {
+    			apiHost = apiDetailsMap.get(END_POINT);
+    			apiAuthToken = apiDetailsMap.get(AUTH_TOKEN);
+    			
+    		} else {
+    			logger.log("Failed retrieving the AUTH token \n");
+				sendResponse(outputStream, getErrorResponse(errStatusCode, "Failed retrieving the AUTH token and EndPoint"));
+				return;
     		}
     		
 			//get request post param "emailid"
@@ -174,35 +179,6 @@ public class GetSubscriberInfoHandler extends BaseResponsysHandler implements Re
 			}
 		}
 		logger.log("The response payload does not have the expected data, returning null from getTransformedResponse() method");
-		return null;
-	}
-	
-	private static Map<String, String> getAuthTokenResponsys() {
-		
-		System.out.println("--------getting AUTHTOKEN-----------");
-		String apiResponse;
-		try {
-			apiResponse = getAuthToken();
-		
-		
-			if(null == apiResponse || apiResponse.length() < 1) {
-				return null;
-			}
-			
-			//parse AUTH TOKEN api response
-			JSONObject responseJson = new JSONObject(apiResponse);
-			String apiHost = responseJson.get(END_POINT).toString();
-			String apiAuthToken = responseJson.get(AUTH_TOKEN).toString();
-			
-			if(apiHost != null && apiAuthToken != null) {
-				Map<String, String> responsysMap = new HashMap<String, String>();
-				responsysMap.put("apiHost", apiHost);
-				responsysMap.put("apiAuthToken", apiAuthToken);
-				return responsysMap;
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 		return null;
 	}
 	

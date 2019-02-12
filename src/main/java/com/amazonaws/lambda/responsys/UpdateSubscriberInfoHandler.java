@@ -35,24 +35,22 @@ public class UpdateSubscriberInfoHandler extends BaseResponsysHandler implements
 		StringBuffer response = new StringBuffer();
     	HttpURLConnection urlConnection = null;
     	int errStatusCode = 400;
+    	String apiHost, apiAuthToken = null;
     	
 		try {
 
-			//make AUTH TOKEN call
-    		String apiResponse = getAuthToken(logger);
-    		logger.log("response receivied from AuthToken API call: " + apiResponse + NEW_LINE);
+			//Get AUTH TOKEN from DB
+    		Map<String, String> apiDetailsMap = getResponsysApiInfo(logger);
     		
-    		if(null == apiResponse || apiResponse.length() < 1) {
-    			logger.log("Failed retrieving the AUTH token \n");
-				sendResponse(outputStream, getErrorResponse(400, "Failed retrieving the AUTH token"));
+    		if(apiDetailsMap != null) {
+    			apiHost = apiDetailsMap.get(END_POINT);
+    			apiAuthToken = apiDetailsMap.get(AUTH_TOKEN);
+    			
+    		} else {
+    			logger.log("Failed retrieving the AUTH token" + NEW_LINE);
+				sendResponse(outputStream, getErrorResponse(errStatusCode, "Failed retrieving the AUTH token and EndPoint"));
 				return;
     		}
-    		
-    		//parse AUTH TOKEN api response
-    		JSONObject responseJson = new JSONObject(apiResponse);
-    		String apiHost = responseJson.get(END_POINT).toString();
-			String apiAuthToken = responseJson.get(AUTH_TOKEN).toString();
-			logger.log("apiAuthToken: " + apiAuthToken +NEW_LINE);
 			
 			//get request payload
 			String payload = generateRequestPayload(inputStream, logger);
@@ -60,7 +58,7 @@ public class UpdateSubscriberInfoHandler extends BaseResponsysHandler implements
 			logger.log("Request payload: " + payload +NEW_LINE);
 			
 			if(payload != null) {
-				
+				long startTime = System.currentTimeMillis();
 				URL subcUrl = new URL(apiHost + UPDATE_API_URL);
 				urlConnection = (HttpURLConnection) subcUrl.openConnection();
 				urlConnection.setRequestMethod("POST");
@@ -92,6 +90,9 @@ public class UpdateSubscriberInfoHandler extends BaseResponsysHandler implements
 				br.close();
 				
 				logger.log("Response from api call: " + response.toString() +NEW_LINE);
+				long endTime = System.currentTimeMillis();
+				logger.log("******************Time elapsed in UPDATAE SUBSCRIBER call: " + (endTime - startTime) + NEW_LINE);
+				
 				JSONObject responseJson2 = new JSONObject(response.toString());
 				logger.log("Response json: " + responseJson2 +NEW_LINE);
 				sendResponse(outputStream, getSucessResponse(response.toString()));
