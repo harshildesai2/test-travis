@@ -56,7 +56,7 @@ public class GetSubscriberInfoHandler extends BaseResponsysHandler implements Re
     		
 			//get request post param "emailid"
 			String emailId = getSubscriberEmail(inputStream);
-			logger.log("Email ID passed in request: " + emailId +NEW_LINE);
+			logger.log("Request BODY content:: Email ID passed in request: " + emailId +NEW_LINE);
 			
 			// Calling responsys to get the subscriber details
 			if( emailId != null && emailId.length() > 0) {

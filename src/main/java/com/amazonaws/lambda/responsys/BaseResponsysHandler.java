@@ -78,7 +78,8 @@ public abstract class BaseResponsysHandler {
 		try {
 			long startTime = System.currentTimeMillis();
 			URL url = new URL(AUTH_TOKEN_EP);
-
+			logger.log("Calling API GETAUTHTOKEN endpoint: " + url +NEW_LINE);
+			
 			conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod(POST);
 			conn.setRequestProperty(CACHE_CONTROL, NO_CACHE);
@@ -202,7 +203,7 @@ public abstract class BaseResponsysHandler {
 		try {
 			tokenItem = retrieveTokenFromDB(getDynamoDB());
 		} catch (Exception e) {
-			logger.log("Error retrieving the token item from dynamoDB: " + e.getStackTrace());
+			e.printStackTrace();
 		}
 		
 		if(tokenItem != null && tokenItem.hasAttribute(AUTH_TOKEN) && tokenItem.hasAttribute(END_POINT)) {
@@ -238,7 +239,7 @@ public abstract class BaseResponsysHandler {
 					}
 	    		}
 			} catch (Exception e) {
-				logger.log("Error retrieving the token from AUTH TOKEN api call: " + e.getStackTrace() + NEW_LINE);
+				e.printStackTrace();
 			}
 		}
 		return apiDetailsMap;
