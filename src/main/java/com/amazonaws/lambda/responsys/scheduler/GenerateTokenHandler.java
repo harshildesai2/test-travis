@@ -16,7 +16,7 @@ import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
  * Lambda scheduler to generate the AUTH token
  *
  */
-public class GenerateTokenScheduler extends BaseResponsysHandler implements RequestStreamHandler {
+public class GenerateTokenHandler extends BaseResponsysHandler implements RequestStreamHandler {
 
 	@Override
 	public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
@@ -53,7 +53,7 @@ public class GenerateTokenScheduler extends BaseResponsysHandler implements Requ
     		}
 		
 		} catch (Exception e) {
-			logger.log("Exception while getting Responsys AUTH token: " + e.getMessage()  + NEW_LINE);
+			e.printStackTrace();
 		}
     	
     	return;

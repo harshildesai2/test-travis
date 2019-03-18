@@ -60,6 +60,8 @@ public class UpdateSubscriberInfoHandler extends BaseResponsysHandler implements
 			if(payload != null) {
 				long startTime = System.currentTimeMillis();
 				URL subcUrl = new URL(apiHost + UPDATE_API_URL);
+				logger.log("Calling API UPDATESUBSCRIBER endpoint: " + subcUrl +NEW_LINE);
+				
 				urlConnection = (HttpURLConnection) subcUrl.openConnection();
 				urlConnection.setRequestMethod("POST");
 				urlConnection.setRequestProperty(CONTENT_TYPE, APPLICATION_JSON);
