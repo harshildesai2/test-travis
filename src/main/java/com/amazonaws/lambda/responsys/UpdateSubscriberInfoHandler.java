@@ -35,22 +35,24 @@ public class UpdateSubscriberInfoHandler extends BaseResponsysHandler implements
 		StringBuffer response = new StringBuffer();
     	HttpURLConnection urlConnection = null;
     	int errStatusCode = 400;
-    	String apiHost, apiAuthToken = null;
     	
 		try {
 
-			//Get AUTH TOKEN from DB
-    		Map<String, String> apiDetailsMap = getResponsysApiInfo(logger);
+			//make AUTH TOKEN call
+    		String apiResponse = getAuthTokenAPI(logger, false);
+    		logger.log("response receivied from AuthToken API call: " + apiResponse + NEW_LINE);
     		
-    		if(apiDetailsMap != null) {
-    			apiHost = apiDetailsMap.get(END_POINT);
-    			apiAuthToken = apiDetailsMap.get(AUTH_TOKEN);
-    			
-    		} else {
+    		if(null == apiResponse || apiResponse.length() < 1) {
     			logger.log("Failed retrieving the AUTH token" + NEW_LINE);
 				sendResponse(outputStream, getErrorResponse(errStatusCode, "Failed retrieving the AUTH token and EndPoint"));
 				return;
     		}
+    		
+    		//parse AUTH TOKEN api response
+    		JSONObject responseJson = new JSONObject(apiResponse);
+    		String apiHost = responseJson.get(END_POINT).toString();
+			String apiAuthToken = responseJson.get(AUTH_TOKEN).toString();
+			logger.log("apiAuthToken: " + apiAuthToken +NEW_LINE);
 			
 			//get request payload
 			String payload = generateRequestPayload(inputStream, logger);

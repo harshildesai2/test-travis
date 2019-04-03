@@ -7,13 +7,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.amazonaws.services.dynamodbv2.document.Item;
-import com.amazonaws.services.dynamodbv2.document.PutItemOutcome;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
@@ -38,22 +35,23 @@ public class GetSubscriberInfoHandler extends BaseResponsysHandler implements Re
     	StringBuffer result = new StringBuffer();
     	HttpURLConnection urlConnection = null;
     	int errStatusCode = 400;
-    	String apiHost, apiAuthToken = null;
     	
     	try {
-    		//Get AUTH TOKEN from DB
-    		Map<String, String> apiDetailsMap = getResponsysApiInfo(logger);
+    		//make AUTH TOKEN call
+    		String apiResponse = getAuthTokenAPI(logger, false);
+    		logger.log("Response receivied from AuthToken API call: " + apiResponse +NEW_LINE);
     		
-    		if(apiDetailsMap != null) {
-    			apiHost = apiDetailsMap.get(END_POINT);
-    			apiAuthToken = apiDetailsMap.get(AUTH_TOKEN);
-    			
-    		} else {
-    			logger.log("Failed retrieving the AUTH token \n");
-				sendResponse(outputStream, getErrorResponse(errStatusCode, "Failed retrieving the AUTH token and EndPoint"));
+    		if(null == apiResponse || apiResponse.length() < 1) {
+    			logger.log("Failed retrieving the AUTH token" + NEW_LINE);
+				sendResponse(outputStream, getErrorResponse(errStatusCode, "Failed retrieving the AUTH token"));
 				return;
     		}
     		
+    		//parse AUTH TOKEN api response
+    		JSONObject responseJson = new JSONObject(apiResponse);
+    		String apiHost = responseJson.get(END_POINT).toString();
+			String apiAuthToken = responseJson.get(AUTH_TOKEN).toString();
+			
 			//get request post param "emailid"
 			String emailId = getSubscriberEmail(inputStream);
 			logger.log("Email ID passed in request: " + emailId +NEW_LINE);
