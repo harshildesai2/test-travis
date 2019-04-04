@@ -122,10 +122,7 @@
 		<groupId>com.llm.Sigv4Util</groupId>
         <artifactId>Sigv4Util</artifactId>
         <version>1.0.0</version>
-		<scope>system</scope>
-		<systemPath>${basedir}/lib/Sigv4Util-1.0.0.jar</systemPath>
 	</dependency>
-		
   </dependencies>
   
 </project>

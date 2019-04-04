@@ -28,6 +28,32 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <id>copy</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <artifactItems>
+            <artifactItem>
+              <groupId>com.amazonaws.lambda</groupId>
+              <artifactId>consentmgtapi</artifactId>
+              <version>1.0.0</version>
+              <type>jar</type>
+              <overWrite>false</overWrite>
+              <outputDirectory>${project.build.directory}/dist</outputDirectory>
+            </artifactItem>
+          </artifactItems>
+          <overWriteSnapshots>true</overWriteSnapshots>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
   <dependencies>
@@ -42,13 +68,6 @@
           <groupId>org.hamcrest</groupId>
         </exclusion>
       </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>com.llm.Sigv4Util</groupId>
-      <artifactId>Sigv4Util</artifactId>
-      <version>1.0.0</version>
-      <scope>system</scope>
-      <systemPath>${basedir}/lib/Sigv4Util-1.0.0.jar</systemPath>
     </dependency>
   </dependencies>
   <dependencyManagement>
