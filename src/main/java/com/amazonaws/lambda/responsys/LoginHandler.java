@@ -35,7 +35,7 @@ public class LoginHandler extends BaseResponsysHandler implements RequestStreamH
     	int errStatusCode = 400;
     	
     	try {
-    		processAuthTokenCall(logger, outputStream, false);
+    		processAuthTokenCall(logger, outputStream, true);
     		
     	} catch (Exception e) {
 			e.printStackTrace();

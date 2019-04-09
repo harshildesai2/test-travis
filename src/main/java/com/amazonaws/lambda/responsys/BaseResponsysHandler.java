@@ -56,6 +56,12 @@ public abstract class BaseResponsysHandler {
 	protected static final String NEW_LINE = "\n";
 	protected static final int errStatusCode = 400;
 	
+	//CORS headers
+	protected static final String HEADERS = "headers";
+	protected static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
+	protected static final String ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
+	protected static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
+	
 	public String getAuthTokenAPI(LambdaLogger logger, boolean isInvalidateCache) throws IOException {
 		
 		long startTime = System.currentTimeMillis();
@@ -75,7 +81,7 @@ public abstract class BaseResponsysHandler {
 		String contentHashString = BinaryUtils.toHex(contentHash);
 
 		//initialize signer
-		AWS4SignerForAuthorizationHeader signer = new AWS4SignerForAuthorizationHeader(new URL(AWS_LOGIN_ENDPOINT),"POST", AWS_SERVICE, AWS_REGION);
+		AWS4SignerForAuthorizationHeader signer = new AWS4SignerForAuthorizationHeader(new URL(AWS_LOGIN_ENDPOINT), POST, AWS_SERVICE, AWS_REGION);
 
 		//calculate authorization header
 		String authorization = signer.computeSignature(headers, null, // no query parameters
@@ -196,9 +202,16 @@ public abstract class BaseResponsysHandler {
 			bodyContent = message.toString();
 		}
 		
+		//Adding CORS headers
+		JSONObject headerJson = new JSONObject();
+		headerJson.put(ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+		headerJson.put(ACCESS_CONTROL_ALLOW_HEADERS, "*");
+		headerJson.put(ACCESS_CONTROL_ALLOW_METHODS, "*");
+		
 		JSONObject responseJson = new JSONObject();
 		responseJson.put(IS_BASE64_ENCODED, false);
 		responseJson.put(STATUS_CODE, "200");
+		responseJson.put(HEADERS, headerJson);
 		responseJson.put(BODY, bodyContent);
 		return responseJson;
 	}
