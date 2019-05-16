@@ -13,10 +13,11 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -27,7 +28,7 @@ import com.integration.util.BinaryUtils;
 
 /**
  * Class containing the common methods used by Lambda functions
- * @author hdesai
+ * @author harshildesai
  *
  */
 public abstract class BaseResponsysHandler {
@@ -93,16 +94,16 @@ public abstract class BaseResponsysHandler {
 		// Setting headers for the service.
 		if (headers != null) {	            
             for ( String headerKey : headers.keySet() ) {	               
-            	postMethod.setHeader(headerKey, headers.get(headerKey));
+            	postMethod.addHeader(headerKey, headers.get(headerKey));
             }
         }
 		
-		DefaultHttpClient httpclient = new DefaultHttpClient();
-		HttpResponse response = httpclient.execute(postMethod);
+		CloseableHttpClient httpClient = HttpClients.createDefault();
+		CloseableHttpResponse httpResponse = httpClient.execute(postMethod);
 		
-		int respCode = response.getStatusLine().getStatusCode();
+		int respCode = httpResponse.getStatusLine().getStatusCode();
 		
-		BufferedReader respReader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+		BufferedReader respReader = new BufferedReader(new InputStreamReader(httpResponse.getEntity().getContent()));
 
 		String line = null;
 		while ((line = respReader.readLine()) != null) {
@@ -122,8 +123,6 @@ public abstract class BaseResponsysHandler {
 			}
 			
 		} else {
-		
-			
 			logger.log("Successfully retrieved the AUTHTOKEN: " + result.toString() + NEW_LINE);
 		}
 	

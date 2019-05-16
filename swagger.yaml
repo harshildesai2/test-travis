@@ -54,6 +54,9 @@
         "security": [
           {
             "sigv4": []
+          },
+          {
+            "api_key": []
           }
         ]
       }
@@ -92,6 +95,9 @@
         "security": [
           {
             "sigv4": []
+          },
+          {
+            "api_key": []
           }
         ]
       }
@@ -130,12 +136,20 @@
         "security": [
           {
             "sigv4": []
+          },
+          {
+            "api_key": []
           }
         ]
       }
     }
   },
   "securityDefinitions": {
+     "api_key": {
+      "type": "apiKey",
+      "name": "x-api-key",
+      "in": "header"
+    },
     "sigv4": {
       "type": "apiKey",
       "name": "Authorization",
