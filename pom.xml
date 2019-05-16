@@ -4,7 +4,7 @@
 
 	<groupId>com.amazonaws.lambda</groupId>
 	<artifactId>consentmgtapi</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<packaging>jar</packaging>
 	<properties>
 		<maven.test.skip>true</maven.test.skip>
@@ -63,7 +63,7 @@
 						<artifactItem>
 							<groupId>com.amazonaws.lambda</groupId>
 							<artifactId>consentmgtapi</artifactId>
-							<version>1.0.0</version>
+							<version>1.0.1</version>
 							<type>jar</type>
 							<overWrite>false</overWrite>
 							<outputDirectory>${project.build.directory}/dist</outputDirectory>
@@ -121,18 +121,21 @@
 			<artifactId>json</artifactId>
 			<version>20180813</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>4.1</version>
-		</dependency>
-
+		<!-- Getting the custom dependency jar -->
 		<dependency>
 			<groupId>com.llm.Sigv4Util</groupId>
 			<artifactId>Sigv4Util</artifactId>
 			<version>1.0.0</version>
 		</dependency>
+	    <dependency>
+	        <groupId>com.amazonaws</groupId>
+	        <artifactId>aws-java-sdk-sqs</artifactId>
+		</dependency>
+		<dependency>
+		  <groupId>org.apache.httpcomponents</groupId>
+		  <artifactId>httpclient</artifactId>
+		  <version>4.5.2</version>
+		 </dependency>
 	</dependencies>
 
 </project>
